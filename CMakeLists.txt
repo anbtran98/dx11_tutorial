@@ -7,7 +7,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 file (GLOB_RECURSE SOURCES
      "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
-add_executable(dx11 ${SOURCES})
-target_link_libraries(dx11 PRIVATE d3d11 dxgi)
+add_executable(dx11 WIN32 ${SOURCES})
+target_link_libraries(dx11 PRIVATE d3d11 dxgi d3dcompiler)
 
-target_link_options(dx11 PRIVATE /ENTRY:WinMainCRTStartup)
+#target_link_options(dx11 PRIVATE /ENTRY:WinMainCRTStartup)
