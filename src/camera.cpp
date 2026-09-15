@@ -17,6 +17,7 @@ void Camera::SetPosition(float x, float y, float z){ mPositionX = x; mPositionY 
 void Camera::SetRotation(float x, float y, float z){ mRotationX = x; mRotationY = y; mRotationZ = z; }
 void Camera::GetViewMatrix(DirectX::XMMATRIX& viewMatrix){ viewMatrix = mViewMatrix; }
 
+#define PIOVER180 0.0174532925f
 void Camera::Render(){
     DirectX::XMFLOAT3 up, position, lookAt;
     DirectX::XMVECTOR upVec, positionVec, lookAtVec;
@@ -41,12 +42,13 @@ void Camera::Render(){
 
     lookAtVec = XMLoadFloat3(&lookAt);
 
-    pitch = mRotationX * 0.0174532925f;
-    yaw = mRotationY * 0.0174532925f;
-    roll = mRotationZ * 0.0174532925f;
+    pitch = mRotationX * PIOVER180;
+    yaw = mRotationY * PIOVER180;
+    roll = mRotationZ * PIOVER180;
 
     rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
-    lookAtVec = XMVector3TransformCoord(upVec, rotationMatrix);
+    lookAtVec = XMVector3TransformCoord(lookAtVec, rotationMatrix);
+    upVec = XMVector3TransformCoord(upVec, rotationMatrix);
 
     lookAtVec = DirectX::XMVectorAdd(positionVec, lookAtVec);
 

@@ -180,7 +180,7 @@ bool DX3D::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd,
     rasterDesc.DepthBiasClamp = 0.0f;
     rasterDesc.DepthClipEnable = true;
     rasterDesc.FillMode = D3D11_FILL_SOLID;
-    rasterDesc.FrontCounterClockwise = true;
+    rasterDesc.FrontCounterClockwise = false;
     rasterDesc.MultisampleEnable = false;
     rasterDesc.ScissorEnable = false;
     rasterDesc.SlopeScaledDepthBias = 0.0f;
@@ -189,9 +189,20 @@ bool DX3D::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd,
     if (FAILED(result)) return false;
     mDeviceContext->RSSetState(mRasterState);
 
+    mViewport.Width = (float)screenWidth;
+    mViewport.Height = (float)screenHeight;
+    mViewport.MinDepth = 0.0f;
+    mViewport.MaxDepth = 1.0f;
+    mViewport.TopLeftX = 0.0f;
+    mViewport.TopLeftY = 0.0f;
+    mDeviceContext->RSSetViewports(1, &mViewport);
+
     FOV = 3.141592654f / 4.0f;
     screenAspect = (float)screenWidth / (float)screenHeight;
     mProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(FOV, screenAspect, screenNear, screenDepth);
+    mWorldMatrix = DirectX::XMMatrixIdentity();
+    mOrthoMatrix = DirectX::XMMatrixOrthographicLH((float)screenWidth, (float)screenHeight, screenNear, screenDepth);
+
     return true;
 }
 

@@ -20,7 +20,7 @@ bool Model::Initialize(ID3D11Device* device){
 /* PRIVATES */
 bool Model::InitializeBuffers(ID3D11Device* device){
     Vertex* vertices;
-    unsigned long* indices;
+    unsigned int* indices;
     D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
     D3D11_SUBRESOURCE_DATA vertexData, indexData;
     HRESULT result;
@@ -29,7 +29,7 @@ bool Model::InitializeBuffers(ID3D11Device* device){
     mIndexCount = 3;
     vertices = new Vertex[mVertexCount];
     if (!vertices) return false;
-    indices = new unsigned long[mIndexCount];
+    indices = new unsigned int[mIndexCount];
     if (!indices) return false;
 
     // counter clockwise for front
@@ -38,8 +38,8 @@ bool Model::InitializeBuffers(ID3D11Device* device){
     vertices[2] = {DirectX::XMFLOAT3(1.0f, -1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f)};
 
     indices[0] = 0;
-    indices[1] = 2;
-    indices[2] = 1;
+    indices[1] = 1;
+    indices[2] = 2;
 
     vertexBufferDesc = {
         .ByteWidth = sizeof(Vertex) * mVertexCount,
@@ -58,7 +58,7 @@ bool Model::InitializeBuffers(ID3D11Device* device){
     if (FAILED(result)) return false;
 
     indexBufferDesc = {
-        .ByteWidth = sizeof(unsigned long) * mIndexCount,
+        .ByteWidth = sizeof(unsigned int) * mIndexCount,
         .Usage = D3D11_USAGE_DEFAULT,
         .BindFlags = D3D11_BIND_INDEX_BUFFER,
         .CPUAccessFlags = 0,

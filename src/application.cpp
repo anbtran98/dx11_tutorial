@@ -77,17 +77,13 @@ bool Application::Render(){
     DirectX::XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
     bool result;
 
-    mDx3d->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
-    
-    // mDx3d->BeginScene(0.3f, 0.3f, 0.3f,1.0f);
-    mCamera->Render();
+    mDx3d->BeginScene(0.15f, 0.15f, 0.15f, 1.0f);
 
+    mCamera->Render();
     mDx3d->GetWorldMatrix(worldMatrix);
     mCamera->GetViewMatrix(viewMatrix);
     mDx3d->GetProjectionMatrix(projectionMatrix);
-
     mModel->Render(mDx3d->GetDeviceContext());
-
     result = mShader->Render(mDx3d->GetDeviceContext(), mModel->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix);
     if(!result) return false;
 

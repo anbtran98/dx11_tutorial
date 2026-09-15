@@ -84,7 +84,7 @@ bool Shader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename
         .SemanticIndex = 0,
         .Format = DXGI_FORMAT_R32G32B32A32_FLOAT,
         .InputSlot = 0,
-        .AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT,
+        .AlignedByteOffset = 12,
         .InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA,
         .InstanceDataStepRate = 0
     };
