@@ -46,7 +46,7 @@ bool Shader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename
     unsigned int  nElements;
     D3D11_BUFFER_DESC matrixBufferDesc;
 
-    result = D3DCompileFromFile(vsFilename, NULL, NULL, "colorVertexshader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+    result = D3DCompileFromFile(vsFilename, NULL, NULL, "colorVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
                                 &vertexShaderBuffer, &errorMsg);
     if (FAILED(result)) {
         if (errorMsg) OutputShaderErrorMessage(errorMsg, hwnd, vsFilename);
@@ -54,7 +54,7 @@ bool Shader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename
         return false;
     }
 
-    result = D3DCompileFromFile(psFilename, NULL, NULL, "colorpixelshader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+    result = D3DCompileFromFile(psFilename, NULL, NULL, "colorPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
                                 &pixelShaderBuffer, &errorMsg);
     if (FAILED(result)) {
         if (errorMsg) OutputShaderErrorMessage(errorMsg, hwnd, psFilename);

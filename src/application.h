@@ -3,6 +3,9 @@
 
 // #include <windows.h>
 #include "dx3d.h"
+#include "camera.h"
+#include "model.h"
+#include "shader.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -12,6 +15,10 @@ const float SCREEN_NEAR = 0.3f;
 class Application {
     bool Render();
     DX3D* mDx3d;
+    Camera* mCamera;
+    Model* mModel;
+    Shader* mShader;
+    
  public:
     Application();
     Application(const Application&);

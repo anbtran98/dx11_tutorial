@@ -33,9 +33,9 @@ bool Model::InitializeBuffers(ID3D11Device* device){
     if (!indices) return false;
 
     // counter clockwise for front
-    vertices[0] = {DirectX::XMFLOAT3(-1.0f, -1.0f, 0.0f), DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)};
+    vertices[0] = {DirectX::XMFLOAT3(-1.0f, -1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f)};
     vertices[1] = {DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f)};
-    vertices[2] = {DirectX::XMFLOAT3(0.0f, -1.0f, 1.0f), DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f)};
+    vertices[2] = {DirectX::XMFLOAT3(1.0f, -1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f)};
 
     indices[0] = 0;
     indices[1] = 2;
