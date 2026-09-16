@@ -1,0 +1,6 @@
+application.cpp:
+    textureFilename changed from ./res/textures/stone01.tga -> ../src/res/textures/stone01.tga works
+textureShader.cpp:
+    vsFilename changed from ./res/shaders/texture.vs -> ../src/res/shaders/texture.vs WORKS
+    psFilename changed from ./res/shaders/texture.ps -> ../src/res/shaders/texture.ps WORKS
+WHY?

@@ -5,7 +5,8 @@
 #include "dx3d.h"
 #include "camera.h"
 #include "model.h"
-#include "shader.h"
+// #include "shader.h"
+#include "textureShader.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -17,8 +18,9 @@ class Application {
     DX3D* mDx3d;
     Camera* mCamera;
     Model* mModel;
-    Shader* mShader;
-    
+    // Shader* mShader;
+    TextureShader* mTextureShader;
+
  public:
     Application();
     Application(const Application&);

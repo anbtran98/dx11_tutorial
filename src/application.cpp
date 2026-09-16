@@ -1,20 +1,22 @@
 #include "application.h"
 #include <iostream>
 /* PUBLIC */
+Application::Application(const Application&){}
+Application::~Application(){}
 Application::Application(){
     mDx3d = nullptr;
     mCamera = nullptr;
     mModel = nullptr;
-    mShader = nullptr;
+    // mShader = nullptr;
+    mTextureShader = nullptr;
 }
-Application::Application(const Application&){}
-Application::~Application(){}
 
 bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     mDx3d = new DX3D;
+    char textureFilename[128];
     bool result = mDx3d->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
     if (!result) {
-        MessageBox(hwnd, (LPCSTR)L"could not initialize Direct3D", (LPCSTR)L"Error", MB_OK);
+        MessageBox(hwnd, "could not initialize Direct3D", "Error", MB_OK);
         return false;
     }
 
@@ -22,26 +24,39 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     mCamera->SetPosition(0.0f, 0.0f, -5.0f);
     
     mModel = new Model;
-    result = mModel->Initialize(mDx3d->GetDevice());
+    strcpy_s(textureFilename, "../src/res/textures/stone01.tga");
+    result = mModel->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), textureFilename);
     if (!result) {
-        MessageBox(hwnd, (LPCSTR)L"Could not initialize the model object.", (LPCSTR)L"Error", MB_OK);
+        MessageBox(hwnd, "Could not initialize the model object.", "Error", MB_OK);
         return false;
     }
 
-    mShader = new Shader;
-    result = mShader->Initialize(mDx3d->GetDevice(), hwnd);
+    mTextureShader = new TextureShader;
+    result = mTextureShader->Initialize(mDx3d->GetDevice(), hwnd);
     if (!result) {
-        MessageBox(hwnd, (LPCSTR)L"Could not initialize the Shader object.", (LPCSTR)L"Error", MB_OK);
-        return false;        
+        MessageBox(hwnd, "Could not initialize Texture Shader object.", "Error", MB_OK);
+        return false;
     }
+
+    // mShader = new Shader;
+    // result = mShader->Initialize(mDx3d->GetDevice(), hwnd);
+    // if (!result) {
+    //     MessageBox(hwnd, (LPCSTR)L"Could not initialize the Shader object.", (LPCSTR)L"Error", MB_OK);
+    //     return false;        
+    // }
     return true;
 }
 
 void Application::Shutdown(){
-    if (mShader) {
-        mShader->Shutdown();
-        delete mShader;
-        mShader = nullptr;
+    // if (mShader) {
+    //     mShader->Shutdown();
+    //     delete mShader;
+    //     mShader = nullptr;
+    // }
+    if (mTextureShader) {
+        mTextureShader->Shutdown();
+        delete mTextureShader;
+        mTextureShader = nullptr;
     }
 
     if (mModel) {
@@ -77,14 +92,18 @@ bool Application::Render(){
     DirectX::XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
     bool result;
 
-    mDx3d->BeginScene(0.15f, 0.15f, 0.15f, 1.0f);
+    mDx3d->BeginScene(0.1f, 0.1f, 0.1f, 1.0f);
+// float color[4] = {0.2f, 0.4f, 0.6f, 1.0f}; // Blue-gray
 
     mCamera->Render();
     mDx3d->GetWorldMatrix(worldMatrix);
     mCamera->GetViewMatrix(viewMatrix);
     mDx3d->GetProjectionMatrix(projectionMatrix);
+
     mModel->Render(mDx3d->GetDeviceContext());
-    result = mShader->Render(mDx3d->GetDeviceContext(), mModel->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix);
+    result = mTextureShader->Render(mDx3d->GetDeviceContext(), mModel->GetIndexCount(),
+                                    worldMatrix, viewMatrix, projectionMatrix, mModel->GetTexture());
+    // result = mShader->Render(mDx3d->GetDeviceContext(), mModel->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix);
     if(!result) return false;
 
     mDx3d->EndScene();
