@@ -1,7 +1,7 @@
 #ifndef _LIGHTSHADER_H
 #define _LIGHTSHADER_H
 
-#include <d3d11>
+#include <d3d11.h>
 #include <d3dcompiler.h>
 #include <directxmath.h>
 #include <fstream>
@@ -38,7 +38,7 @@ class LightShader {
     LightShader(const LightShader&);
     ~LightShader();
 
-    bool Initialize(D3D11Device*, HWND);
+    bool Initialize(ID3D11Device*, HWND);
     void Shutdown();
     bool Render(ID3D11DeviceContext*, int, DirectX::XMMATRIX, DirectX::XMMATRIX, DirectX::XMMATRIX, ID3D11ShaderResourceView*,
                 DirectX::XMFLOAT3, DirectX::XMFLOAT4);

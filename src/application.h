@@ -5,8 +5,9 @@
 #include "dx3d.h"
 #include "camera.h"
 #include "model.h"
-// #include "shader.h"
-#include "textureShader.h"
+
+#include "lightShader.h"
+#include "light.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -14,12 +15,13 @@ const float SCREEN_DEPTH = 1000.0f;
 const float SCREEN_NEAR = 0.3f;
 
 class Application {
-    bool Render();
     DX3D* mDx3d;
     Camera* mCamera;
     Model* mModel;
-    // Shader* mShader;
-    TextureShader* mTextureShader;
+    LightShader* mLightShader;
+    Light* mLight;
+
+    bool Render(float);    
 
  public:
     Application();

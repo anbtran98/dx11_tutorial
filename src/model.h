@@ -10,6 +10,7 @@ class Model {
     struct Vertex {
         DirectX::XMFLOAT3 position;
         DirectX::XMFLOAT2 texture;
+        DirectX::XMFLOAT3 normal;
     };
 
     ID3D11Buffer *mVertexBuffer, *mIndexBuffer;

@@ -1,5 +1,5 @@
 cbuffer MatrixBuffer {
-    matrix  worldMatrix;
+    matrix worldMatrix;
     matrix viewMatrix;
     matrix projectionMatrix;
 };
@@ -16,13 +16,13 @@ struct PixelInput {
     float3 normal : NORMAL;
 };
 
-PixleInput LightVertexShader (VertexInput input) {
+PixelInput LightVertexShader (VertexInput input) {
     PixelInput output;
     
     input.position.w =  1.0f;
     output.position = mul(input.position, worldMatrix);
-    output.position = mul(onput.position, viewMatrix);
-    output.position = mul(onput.position. projectionMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
     output.tex = input.tex;
 
     output.normal = mul(input.normal, (float3x3)worldMatrix);
