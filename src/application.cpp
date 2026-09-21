@@ -22,7 +22,7 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     }
 
     mCamera = new Camera;
-    mCamera->SetPosition(0.0f, 0.0f, -5.0f);
+    mCamera->SetPosition(0.0f, 0.0f, -10.0f);
 
     strcpy_s(modelFilename, "../src/res/data/cubeVertices.txt");
     strcpy_s(textureFilename, "../src/res/textures/stone01.tga");
@@ -94,7 +94,7 @@ bool Application::Frame() {
 
 /* PRIVATE */
 bool Application::Render(float rotation){
-    DirectX::XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+    DirectX::XMMATRIX worldMatrix, viewMatrix, projectionMatrix, scaleMatrix, rotateMatrix, translateMatrix, srMatrix;
     bool result;
 
     mDx3d->BeginScene(0.1f, 0.1f, 0.1f, 1.0f);
@@ -105,7 +105,14 @@ bool Application::Render(float rotation){
     mCamera->GetViewMatrix(viewMatrix);
     mDx3d->GetProjectionMatrix(projectionMatrix);
 
-    worldMatrix = DirectX::XMMatrixRotationY(rotation);
+    // cube 1
+    rotateMatrix = DirectX::XMMatrixRotationY(rotation);
+    translateMatrix = DirectX::XMMatrixTranslation(-2.0f, 0.0f, 0.0f);
+
+    // line below makes cube rotate in place
+    worldMatrix = DirectX::XMMatrixMultiply(rotateMatrix, translateMatrix);
+    // line below makes cube move in circle
+    // worldMatrix = DirectX::XMMatrixMultiply(translateMatrix, rotateMatrix);
 
     mModel->Render(mDx3d->GetDeviceContext());
 
@@ -113,6 +120,17 @@ bool Application::Render(float rotation){
                                   mModel->GetTexture(), mLight->GetDirection(), mLight->GetDiffuseColor());
 
     if(!result) return false;
+
+    // cube 2
+    scaleMatrix = DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f);
+    rotateMatrix = DirectX::XMMatrixRotationY(rotation);
+    translateMatrix = DirectX::XMMatrixTranslation(2.0f, 0.0f, 0.0f);
+    srMatrix = DirectX::XMMatrixMultiply(scaleMatrix, rotateMatrix);
+    worldMatrix = DirectX::XMMatrixMultiply(srMatrix, translateMatrix);
+    mModel->Render(mDx3d->GetDeviceContext());
+    result = mLightShader->Render(mDx3d->GetDeviceContext(), mModel->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+                                  mModel->GetTexture(), mLight->GetDirection(), mLight->GetDiffuseColor());
+    if (!result) return false;
 
     mDx3d->EndScene();
     return true;
