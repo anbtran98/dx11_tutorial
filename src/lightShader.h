@@ -1,3 +1,4 @@
+
 #ifndef _LIGHTSHADER_H
 #define _LIGHTSHADER_H
 
@@ -14,6 +15,7 @@ class LightShader {
     };
 
     struct LightBuffer {
+        DirectX::XMFLOAT4 ambientColor;;
         DirectX::XMFLOAT4 diffuseColor;
         DirectX::XMFLOAT3 lightDirection;
         float padding;
@@ -29,8 +31,8 @@ class LightShader {
     bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
     void ShutdownShader();
     void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
-    bool SetShaderParameters(ID3D11DeviceContext*, DirectX::XMMATRIX, DirectX::XMMATRIX, DirectX::XMMATRIX, ID3D11ShaderResourceView*,
-                             DirectX::XMFLOAT3, DirectX::XMFLOAT4);
+    bool SetShaderParameters(ID3D11DeviceContext*, DirectX::XMMATRIX, DirectX::XMMATRIX, DirectX::XMMATRIX,
+                             ID3D11ShaderResourceView*, DirectX::XMFLOAT3, DirectX::XMFLOAT4, DirectX::XMFLOAT4);
     void RenderShader(ID3D11DeviceContext*, int);
 
  public:
@@ -41,7 +43,7 @@ class LightShader {
     bool Initialize(ID3D11Device*, HWND);
     void Shutdown();
     bool Render(ID3D11DeviceContext*, int, DirectX::XMMATRIX, DirectX::XMMATRIX, DirectX::XMMATRIX, ID3D11ShaderResourceView*,
-                DirectX::XMFLOAT3, DirectX::XMFLOAT4);
+                DirectX::XMFLOAT3, DirectX::XMFLOAT4, DirectX::XMFLOAT4);
 };
 
 #endif // _LIGHTSHADER_H

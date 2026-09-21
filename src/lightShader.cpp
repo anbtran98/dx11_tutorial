@@ -39,10 +39,11 @@ bool LightShader::Initialize(ID3D11Device* device, HWND hwnd){
 bool LightShader::Render(ID3D11DeviceContext* deviceContext, int indexCount,
                          DirectX::XMMATRIX worldMatrix, DirectX::XMMATRIX viewMatrix,
                          DirectX::XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture,
-                         DirectX::XMFLOAT3 lightDirection, DirectX::XMFLOAT4 diffuseColor)
+                         DirectX::XMFLOAT3 lightDirection, DirectX::XMFLOAT4 ambientColor, DirectX::XMFLOAT4 diffuseColor)
 {
     bool result;
-    result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, diffuseColor);
+    result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix,
+                                 texture, lightDirection, ambientColor, diffuseColor);
     if (!result) return false;
     RenderShader(deviceContext, indexCount);
     return true;
@@ -218,7 +219,8 @@ void LightShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, 
 bool LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
                                       DirectX::XMMATRIX worldMatrix, DirectX::XMMATRIX viewMatrix,
                                       DirectX::XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture,
-                                      DirectX::XMFLOAT3 lightDirection, DirectX::XMFLOAT4 diffuseColor)
+                                      DirectX::XMFLOAT3 lightDirection, DirectX::XMFLOAT4 ambientColor,
+                                      DirectX::XMFLOAT4 diffuseColor)
 {
     HRESULT result;
     D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -248,6 +250,7 @@ bool LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
     if (FAILED(result)) return false;
 
     dataPtr2 = (LightBuffer*)mappedResource.pData;
+    dataPtr2->ambientColor = ambientColor;
     dataPtr2->diffuseColor = diffuseColor;
     dataPtr2->lightDirection = lightDirection;
     dataPtr2->padding = 0.0f;
