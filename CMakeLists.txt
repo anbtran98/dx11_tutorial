@@ -9,5 +9,4 @@ file (GLOB_RECURSE SOURCES
 
 add_executable(dx11 WIN32 ${SOURCES})
 target_link_libraries(dx11 PRIVATE d3d11 dxgi d3dcompiler)
-
-#target_link_options(dx11 PRIVATE /ENTRY:WinMainCRTStartup)
+#target_link_options(dx11 PRIVATE /SUBSYSTEM:CONSOL /ENTRY:WinMainCRTStartup)

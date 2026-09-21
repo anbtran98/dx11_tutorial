@@ -13,6 +13,7 @@ Application::Application(){
 
 bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     mDx3d = new DX3D;
+    char modelFilename[128];
     char textureFilename[128];
     bool result = mDx3d->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
     if (!result) {
@@ -22,10 +23,12 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
 
     mCamera = new Camera;
     mCamera->SetPosition(0.0f, 0.0f, -5.0f);
+
+    strcpy_s(modelFilename, "../src/res/data/cubeVertices.txt");
+    strcpy_s(textureFilename, "../src/res/textures/stone01.tga");
     
     mModel = new Model;
-    strcpy_s(textureFilename, "../src/res/textures/stone01.tga");
-    result = mModel->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), textureFilename);
+    result = mModel->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), modelFilename, textureFilename);
     if (!result) {
         MessageBox(hwnd, "Could not initialize the model object.", "Error", MB_OK);
         return false;
