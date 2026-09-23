@@ -22,9 +22,10 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     }
 
     mCamera = new Camera;
-    mCamera->SetPosition(0.0f, 0.0f, -10.0f);
+    mCamera->SetPosition(0.0f, 0.0f, -5.0f);
 
-    strcpy_s(modelFilename, "../src/res/data/cubeVertices.txt");
+    // strcpy_s(modelFilename, "../src/res/data/cubeVertices.txt");
+    strcpy_s(modelFilename, "../src/res/data/sphere.txt");
     strcpy_s(textureFilename, "../src/res/textures/stone01.tga");
     
     mModel = new Model;
@@ -44,7 +45,9 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     mLight = new Light;
     mLight->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
     mLight->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-    mLight->SetDirection(1.0f, 0.0f, 0.0f);
+    mLight->SetDirection(1.0f, 0.0f, 1.0f);
+    mLight->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
+    mLight->SetSpecularPower(32.0f);
     return true;
 }
 
@@ -96,7 +99,6 @@ bool Application::Frame() {
 /* PRIVATE */
 bool Application::Render(float rotation){
     DirectX::XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
-    // DirectX::XMMATRIX scaleMatrix, rotateMatrix, translateMatrix, srMatrix;
     bool result;
 
     mDx3d->BeginScene(0.01f, 0.01f, 0.01f, 1.0f);
@@ -107,34 +109,15 @@ bool Application::Render(float rotation){
     mCamera->GetViewMatrix(viewMatrix);
     mDx3d->GetProjectionMatrix(projectionMatrix);
 
-    // cube 1
-    // rotateMatrix = DirectX::XMMatrixRotationY(rotation);
-    // translateMatrix = DirectX::XMMatrixTranslation(-2.0f, 0.0f, 0.0f);
-
-    // line below makes cube rotate in place
-    // worldMatrix = DirectX::XMMatrixMultiply(rotateMatrix, translateMatrix);
-    // line below makes cube move in circle
-    // worldMatrix = DirectX::XMMatrixMultiply(translateMatrix, rotateMatrix);
-
     worldMatrix = DirectX::XMMatrixRotationY(rotation);
     mModel->Render(mDx3d->GetDeviceContext());
 
     result = mLightShader->Render(mDx3d->GetDeviceContext(), mModel->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
                                   mModel->GetTexture(), mLight->GetDirection(),
-                                  mLight->GetAmbientColor(), mLight->GetDiffuseColor());
+                                  mLight->GetAmbientColor(), mLight->GetDiffuseColor(),
+                                  mCamera->GetPosition(), mLight->GetSpecularColor(), mLight->GetSpecularPower());
 
     if(!result) return false;
-
-    // cube 2
-    // scaleMatrix = DirectX::XMMatrixScaling(0.5f, 0.5f, 0.5f);
-    // rotateMatrix = DirectX::XMMatrixRotationY(rotation);
-    // translateMatrix = DirectX::XMMatrixTranslation(2.0f, 0.0f, 0.0f);
-    // srMatrix = DirectX::XMMatrixMultiply(scaleMatrix, rotateMatrix);
-    // worldMatrix = DirectX::XMMatrixMultiply(srMatrix, translateMatrix);
-    // mModel->Render(mDx3d->GetDeviceContext());
-    // result = mLightShader->Render(mDx3d->GetDeviceContext(), mModel->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
-    //                               mModel->GetTexture(), mLight->GetDirection(), mLight->GetDiffuseColor());
-    // if (!result) return false;
 
     mDx3d->EndScene();
     return true;
