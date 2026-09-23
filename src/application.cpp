@@ -22,7 +22,7 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     }
 
     mCamera = new Camera;
-    mCamera->SetPosition(0.0f, 2.0f, -12.0f);
+    mCamera->SetPosition(0.0f, 7.0f, -12.0f);
     mCamera->Render();
 
     // strcpy_s(modelFilename, "../src/res/data/cubeVertices.txt");
@@ -62,9 +62,9 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
 }
 
 void Application::Shutdown(){
-    if (mLight) {
-        delete mLight;
-        mLight = nullptr;
+    if (mLights) {
+        delete [] mLights;
+        mLights = nullptr;
     }
 
     if (mLightShader) {
@@ -109,23 +109,24 @@ bool Application::Frame() {
 /* PRIVATE */
 bool Application::Render(float rotation){
     DirectX::XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+    DirectX::XMFLOAT4 diffuseColor[4], lightPosition[4];
     bool result;
 
     mDx3d->BeginScene(0.01f, 0.01f, 0.01f, 1.0f);
 
-    mCamera->Render();
-
     mDx3d->GetWorldMatrix(worldMatrix);
     mCamera->GetViewMatrix(viewMatrix);
     mDx3d->GetProjectionMatrix(projectionMatrix);
+ 
+    for (int i = 0; i < mNumLights; i++) {
+        diffuseColor[i] = mLights[i].GetDiffuseColor();
+        lightPosition[i] = mLights[i].GetPosition();
+    }
 
-    worldMatrix = DirectX::XMMatrixRotationY(rotation);
     mModel->Render(mDx3d->GetDeviceContext());
 
     result = mLightShader->Render(mDx3d->GetDeviceContext(), mModel->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
-                                  mModel->GetTexture(), mLight->GetDirection(),
-                                  mLight->GetAmbientColor(), mLight->GetDiffuseColor(),
-                                  mCamera->GetPosition(), mLight->GetSpecularColor(), mLight->GetSpecularPower());
+                                  mModel->GetTexture(), diffuseColor, lightPosition);
 
     if(!result) return false;
 

@@ -237,7 +237,7 @@ void LightShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, 
 bool LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
                                       DirectX::XMMATRIX worldMatrix, DirectX::XMMATRIX viewMatrix,
                                       DirectX::XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture,
-                                      DirectX::XMFLOAT3 diffuseColor[], DirectX::XMFLOAT4 lightPosition[])
+                                      DirectX::XMFLOAT4 diffuseColor[], DirectX::XMFLOAT4 lightPosition[])
 {
     HRESULT result;
     D3D11_MAPPED_SUBRESOURCE mappedResource;

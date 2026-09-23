@@ -37,7 +37,7 @@ void Camera::Render(){
     positionVec = XMLoadFloat3(&position);
 
     lookAt.x = 0.0f;
-    lookAt.y = 0.0f;
+    lookAt.y = -0.5f;
     lookAt.z = 1.0f;
 
     lookAtVec = XMLoadFloat3(&lookAt);

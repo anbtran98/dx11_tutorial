@@ -44,7 +44,7 @@ PixelInput LightVertexShader (VertexInput input) {
     worldPosition = mul(input.position, worldMatrix);
 
     for (int i = 0; i < NUM_LIGHTS; i++) {
-        output.lightPos[i] = lightPos[i].xyz - worldPosition[i].xyz;
+        output.lightPos[i] = lightPosition[i].xyz - worldPosition.xyz;
         output.lightPos[i] = normalize(output.lightPos[i]);
     }
     
