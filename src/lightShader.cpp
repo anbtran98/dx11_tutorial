@@ -9,8 +9,8 @@ LightShader::LightShader(){
     mLayout = nullptr;
     mSampleState = nullptr;
     mMatrixBuffer = nullptr;
-    mLightBuffer = nullptr;
-    mCameraBuffer = nullptr;
+    mLightColorBuffer = nullptr;
+    mLightPositionBuffer = nullptr;
 }
 
 bool LightShader::Initialize(ID3D11Device* device, HWND hwnd){
@@ -40,12 +40,11 @@ bool LightShader::Initialize(ID3D11Device* device, HWND hwnd){
 bool LightShader::Render(ID3D11DeviceContext* deviceContext, int indexCount,
                          DirectX::XMMATRIX worldMatrix, DirectX::XMMATRIX viewMatrix,
                          DirectX::XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture,
-                         DirectX::XMFLOAT3 lightDirection, DirectX::XMFLOAT4 ambientColor,
-                         DirectX::XMFLOAT4 diffuseColor, DirectX::XMFLOAT3 cameraPosition, DirectX::XMFLOAT4 specularColor, float specularPower)
+                         DirectX::XMFLOAT4 diffuseColor[], DirectX::XMFLOAT4 lightPosition[])
 {
     bool result;
     result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix,
-                                 texture, lightDirection, ambientColor, diffuseColor, cameraPosition, specularColor, specularPower);
+                                 texture, diffuseColor, lightPosition);
     if (!result) return false;
     RenderShader(deviceContext, indexCount);
     return true;
@@ -60,8 +59,8 @@ bool LightShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFil
     unsigned int numElements;
     D3D11_SAMPLER_DESC samplerDesc;
     D3D11_BUFFER_DESC matrixBufferDesc;
-    D3D11_BUFFER_DESC lightBufferDesc;
-    D3D11_BUFFER_DESC cameraBufferDesc;
+    D3D11_BUFFER_DESC lightColorBufferDesc;
+    D3D11_BUFFER_DESC lightPositionBufferDesc;
 
     result = D3DCompileFromFile(vsFilename, NULL, NULL, "LightVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
                                 &vertexShaderBuffer, &errorMessage);
@@ -161,27 +160,27 @@ bool LightShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFil
         return false;
     }
 
-    cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    cameraBufferDesc.ByteWidth = sizeof(CameraBuffer);
-    cameraBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    cameraBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    cameraBufferDesc.MiscFlags = 0;
-    cameraBufferDesc.StructureByteStride = 0;
-    result = device->CreateBuffer(&cameraBufferDesc, NULL, &mCameraBuffer);
+    lightColorBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    lightColorBufferDesc.ByteWidth = sizeof(LightColorBuffer);
+    lightColorBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    lightColorBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    lightColorBufferDesc.MiscFlags = 0;
+    lightColorBufferDesc.StructureByteStride = 0;
+    result = device->CreateBuffer(&lightColorBufferDesc, NULL, &mLightColorBuffer);
     if (FAILED(result)) {
-        MessageBox(hwnd, (LPCSTR)"Createbuffer() :: camera Constant Buffer:: FAILED", "ERROR", MB_OK);
+        MessageBox(hwnd, (LPCSTR)"Createbuffer() :: Light Color Constant Buffer:: FAILED", "ERROR", MB_OK);
         return false;
     }    
 
-    lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    lightBufferDesc.ByteWidth = sizeof(LightBuffer);
-    lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    lightBufferDesc.MiscFlags = 0;
-    lightBufferDesc.StructureByteStride = 0;    
-    result = device->CreateBuffer(&lightBufferDesc, NULL, &mLightBuffer);
+    lightPositionBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    lightPositionBufferDesc.ByteWidth = sizeof(LightPositionBuffer);
+    lightPositionBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    lightPositionBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    lightPositionBufferDesc.MiscFlags = 0;
+    lightPositionBufferDesc.StructureByteStride = 0;    
+    result = device->CreateBuffer(&lightPositionBufferDesc, NULL, &mLightPositionBuffer);
     if (FAILED(result)) {
-        MessageBox(hwnd, (LPCSTR)"Createbuffer() :: Light Constant Buffer:: FAILED", "ERROR", MB_OK);
+        MessageBox(hwnd, (LPCSTR)"Createbuffer() :: Light Position Constant Buffer:: FAILED", "ERROR", MB_OK);
         return false;
     }
 
@@ -189,13 +188,13 @@ bool LightShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFil
 }
 
 void LightShader::ShutdownShader(){
-    if (mCameraBuffer) {
-        mCameraBuffer->Release();
-        mCameraBuffer = nullptr;
+    if (mLightColorBuffer) {
+        mLightColorBuffer->Release();
+        mLightColorBuffer = nullptr;
     }
-    if (mLightBuffer) {
-        mLightBuffer->Release();
-        mLightBuffer = nullptr;
+    if (mLightPositionBuffer) {
+        mLightPositionBuffer->Release();
+        mLightPositionBuffer = nullptr;
     }
     if (mMatrixBuffer) {
         mMatrixBuffer->Release();
@@ -238,16 +237,14 @@ void LightShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, 
 bool LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
                                       DirectX::XMMATRIX worldMatrix, DirectX::XMMATRIX viewMatrix,
                                       DirectX::XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture,
-                                      DirectX::XMFLOAT3 lightDirection, DirectX::XMFLOAT4 ambientColor,
-                                      DirectX::XMFLOAT4 diffuseColor, DirectX::XMFLOAT3 cameraPosition,
-                                      DirectX::XMFLOAT4 specularColor, float specularPower)
+                                      DirectX::XMFLOAT3 diffuseColor[], DirectX::XMFLOAT4 lightPosition[])
 {
     HRESULT result;
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     unsigned int bufferNumber;
     MatrixBuffer* dataPtr;
-    LightBuffer* dataPtr2;
-    CameraBuffer* dataPtr3;
+    LightPositionBuffer* dataPtr2;
+    LightColorBuffer* dataPtr3;
 
     worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
     viewMatrix = DirectX::XMMatrixTranspose(viewMatrix);
@@ -265,33 +262,33 @@ bool LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
     bufferNumber = 0;
     deviceContext->VSSetConstantBuffers(bufferNumber, 1, &mMatrixBuffer);
 
-    // Set camera constant buffer for Vertex Shader
-    result = deviceContext->Map(mCameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+    // Set constant buffer for Pixle Shader
+    result = deviceContext->Map(mLightPositionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     if (FAILED(result)) return false;
-    dataPtr3 = (CameraBuffer*)mappedResource.pData;
-    dataPtr3->cameraPosition = cameraPosition;
-    dataPtr3->padding = 0.0f;
-    deviceContext->Unmap(mCameraBuffer, 0);
 
+    dataPtr2 = (LightPositionBuffer*)mappedResource.pData;
+    dataPtr2->lightPosition[0] = lightPosition[0];
+    dataPtr2->lightPosition[1] = lightPosition[1];
+    dataPtr2->lightPosition[2] = lightPosition[2];
+    dataPtr2->lightPosition[3] = lightPosition[3];
+
+    deviceContext->Unmap(mLightPositionBuffer, 0);
     bufferNumber = 1;
-    deviceContext->VSSetConstantBuffers(bufferNumber, 1, &mCameraBuffer);
-    
+    deviceContext->VSSetConstantBuffers(bufferNumber, 1, &mLightPositionBuffer);
     deviceContext->PSSetShaderResources(0, 1, &texture);
 
-    // Set constant buffer for Pixle Shader
-    result = deviceContext->Map(mLightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+    // Set camera constant buffer for Vertex Shader
+    result = deviceContext->Map(mLightColorBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     if (FAILED(result)) return false;
+    dataPtr3 = (LightColorBuffer*)mappedResource.pData;
+    dataPtr3->diffuseColor[0] = diffuseColor[0];
+    dataPtr3->diffuseColor[1] = diffuseColor[1];
+    dataPtr3->diffuseColor[2] = diffuseColor[2];
+    dataPtr3->diffuseColor[3] = diffuseColor[3];
+    deviceContext->Unmap(mLightColorBuffer, 0);
 
-    dataPtr2 = (LightBuffer*)mappedResource.pData;
-    dataPtr2->ambientColor = ambientColor;
-    dataPtr2->diffuseColor = diffuseColor;
-    dataPtr2->lightDirection = lightDirection;
-    dataPtr2->specularColor = specularColor;
-    dataPtr2->specularPower = specularPower;
-
-    deviceContext->Unmap(mLightBuffer, 0);
     bufferNumber = 0;
-    deviceContext->PSSetConstantBuffers(bufferNumber, 1, &mLightBuffer);
+    deviceContext->PSSetConstantBuffers(bufferNumber, 1, &mLightColorBuffer);
 
     return true;
 }

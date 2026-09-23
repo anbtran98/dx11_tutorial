@@ -8,7 +8,7 @@ Application::Application(){
     mCamera = nullptr;
     mModel = nullptr;
     mLightShader = nullptr;
-    mLight = nullptr;
+    mLights = nullptr;
 }
 
 bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
@@ -22,10 +22,12 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     }
 
     mCamera = new Camera;
-    mCamera->SetPosition(0.0f, 0.0f, -5.0f);
+    mCamera->SetPosition(0.0f, 2.0f, -12.0f);
+    mCamera->Render();
 
     // strcpy_s(modelFilename, "../src/res/data/cubeVertices.txt");
-    strcpy_s(modelFilename, "../src/res/data/sphere.txt");
+    // strcpy_s(modelFilename, "../src/res/data/sphere.txt");
+    strcpy_s(modelFilename, "../src/res/data/plane.txt");
     strcpy_s(textureFilename, "../src/res/textures/stone01.tga");
     
     mModel = new Model;
@@ -42,12 +44,20 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
         return false;
     }    
 
-    mLight = new Light;
-    mLight->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
-    mLight->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-    mLight->SetDirection(1.0f, 0.0f, 1.0f);
-    mLight->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
-    mLight->SetSpecularPower(32.0f);
+    mNumLights = 4;
+    mLights = new Light[mNumLights];
+    mLights[0].SetDiffuseColor(1.0f, 0.0f, 0.0f, 1.0f);
+    mLights[0].SetPosition(-3.0f, 1.0f, 3.0f);
+
+    mLights[1].SetDiffuseColor(0.0f, 1.0f, 0.0f, 1.0f);
+    mLights[1].SetPosition(3.0f, 1.0f, 3.0f);
+
+    mLights[2].SetDiffuseColor(0.0f, 0.0f, 1.0f, 1.0f);
+    mLights[2].SetPosition(-3.0f, 1.0f, -3.0f);
+
+    mLights[3].SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+    mLights[3].SetPosition(3.0f, 1.0f, -3.0f);
+    
     return true;
 }
 

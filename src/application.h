@@ -19,7 +19,8 @@ class Application {
     Camera* mCamera;
     Model* mModel;
     LightShader* mLightShader;
-    Light* mLight;
+    Light* mLights;
+    int mNumLights;
 
     bool Render(float);    
 

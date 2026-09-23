@@ -7,6 +7,7 @@ class Light {
     DirectX::XMFLOAT4 mAmbientColor;
     DirectX::XMFLOAT4 mDiffuseColor;
     DirectX::XMFLOAT4 mSpecularColor;
+    DirectX::XMFLOAT4 mPosition;
     DirectX::XMFLOAT3 mDirection;
     float mSpecularPower;
 
@@ -15,12 +16,14 @@ class Light {
     Light(const Light&);
     ~Light();
 
+    void SetPosition(float, float, float);
     void SetAmbientColor(float, float, float, float);
     void SetDiffuseColor(float, float, float, float);
     void SetSpecularColor(float, float, float, float);
     void SetDirection(float, float, float);
     void SetSpecularPower(float);
 
+    DirectX::XMFLOAT4 GetPosition();
     DirectX::XMFLOAT4 GetAmbientColor();
     DirectX::XMFLOAT4 GetDiffuseColor();
     DirectX::XMFLOAT4 GetSpecularColor();
