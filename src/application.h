@@ -4,10 +4,8 @@
 // #include <windows.h>
 #include "dx3d.h"
 #include "camera.h"
-#include "model.h"
-
-#include "lightShader.h"
-#include "light.h"
+#include "textureShader.h"
+#include "bitmap.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -17,12 +15,10 @@ const float SCREEN_NEAR = 0.3f;
 class Application {
     DX3D* mDx3d;
     Camera* mCamera;
-    Model* mModel;
-    LightShader* mLightShader;
-    Light* mLights;
-    int mNumLights;
+    TextureShader* mTextureShader;
+    Bitmap* mBitmap;
 
-    bool Render(float);    
+    bool Render();
 
  public:
     Application();

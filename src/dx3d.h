@@ -18,6 +18,7 @@ class DX3D {
     ID3D11RenderTargetView* mRenderTargetView;
     ID3D11Texture2D* mDepthStencilBuffer;
     ID3D11DepthStencilState* mDepthStencilState;
+    ID3D11DepthStencilState* mDepthDisabledStencilState;
     ID3D11DepthStencilView* mDepthStencilView;
     ID3D11RasterizerState* mRasterState;
     DirectX::XMMATRIX mWorldMatrix;
@@ -47,6 +48,9 @@ class DX3D {
 
     void SetBackBufferRenderTarget();
     void ResetViewport();
+
+    void TurnZBufferOn();
+    void TurnZBufferOff();
 };
 
 #endif // _DX3D_H

@@ -1,4 +1,11 @@
 #include "dx3d.h"
+
+DX3D::DX3D(const DX3D&){}
+DX3D::~DX3D(){}
+void DX3D::SetBackBufferRenderTarget(){mDeviceContext->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);}
+void DX3D::ResetViewport(){mDeviceContext->RSSetViewports(1, &mViewport);}
+void DX3D::TurnZBufferOn() {mDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);}
+void DX3D::TurnZBufferOff() {mDeviceContext->OMSetDepthStencilState(mDepthDisabledStencilState, 1);}
 DX3D::DX3D(){
     mSwapChain = nullptr;
     mDevice = nullptr;
@@ -8,12 +15,7 @@ DX3D::DX3D(){
     mDepthStencilState = nullptr;
     mDepthStencilView = nullptr;
     mRasterState = nullptr;
-    }
-
-DX3D::DX3D(const DX3D&){
-}
-
-DX3D::~DX3D(){
+    mDepthDisabledStencilState = nullptr;
 }
 
 bool DX3D::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd,
@@ -30,6 +32,7 @@ bool DX3D::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd,
     D3D_FEATURE_LEVEL featureLevel;
     D3D11_TEXTURE2D_DESC depthBufferDesc;
     D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+    D3D11_DEPTH_STENCIL_DESC depthDisabledStencilDesc;
     D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
     D3D11_RASTERIZER_DESC rasterDesc;
 
@@ -203,11 +206,30 @@ bool DX3D::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd,
     mWorldMatrix = DirectX::XMMatrixIdentity();
     mOrthoMatrix = DirectX::XMMatrixOrthographicLH((float)screenWidth, (float)screenHeight, screenNear, screenDepth);
 
+    ZeroMemory(&depthDisabledStencilDesc, sizeof(depthDisabledStencilDesc));
+    depthDisabledStencilDesc.DepthEnable = false;
+    depthDisabledStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    depthDisabledStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+    depthDisabledStencilDesc.StencilEnable = true;
+    depthDisabledStencilDesc.StencilReadMask = 0xFF;
+    depthDisabledStencilDesc.StencilWriteMask = 0xFf;
+    depthDisabledStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    depthDisabledStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+    depthDisabledStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    depthDisabledStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+    depthDisabledStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    depthDisabledStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+    depthDisabledStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    depthDisabledStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;    
+    result = mDevice->CreateDepthStencilState(&depthDisabledStencilDesc, &mDepthDisabledStencilState);
+    if (FAILED(result)) return false;
+
     return true;
 }
 
 void DX3D::Shutdown(){
     if (mSwapChain) { mSwapChain->SetFullscreenState(false, NULL); }
+    if (mDepthDisabledStencilState) {mDepthDisabledStencilState->Release(); mDepthDisabledStencilState = nullptr;}
     if (mRasterState) { mRasterState->Release(); mRasterState = nullptr; }
     if (mDepthStencilView) { mDepthStencilView->Release(); mDepthStencilView = nullptr; }
     if (mDepthStencilState) { mDepthStencilState->Release(); mDepthStencilState = nullptr; }
@@ -241,14 +263,3 @@ void DX3D::GetVideoCardInfo(char* vCardName, int& memory){
     memory = mVRam;
     return;
 }
-
-void DX3D::SetBackBufferRenderTarget(){
-    mDeviceContext->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);
-    return;
-}
-
-void DX3D::ResetViewport(){
-    mDeviceContext->RSSetViewports(1, &mViewport);
-    return;
-}
-
