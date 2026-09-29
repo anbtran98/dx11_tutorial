@@ -5,7 +5,8 @@
 #include "dx3d.h"
 #include "camera.h"
 #include "textureShader.h"
-#include "bitmap.h"
+#include "sprite.h"
+#include "timer.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -16,7 +17,8 @@ class Application {
     DX3D* mDx3d;
     Camera* mCamera;
     TextureShader* mTextureShader;
-    Bitmap* mBitmap;
+    Sprite* mSprite;
+    Timer* mTimer;
 
     bool Render();
 

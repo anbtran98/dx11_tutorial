@@ -7,12 +7,13 @@ Application::Application(){
     mDx3d = nullptr;
     mCamera = nullptr;
     mTextureShader = nullptr;
-    mBitmap = nullptr;
+    mSprite = nullptr;
+    mTimer = nullptr;
 }
 
 bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     mDx3d = new DX3D;
-    char bitmapFilename[128];
+    char spriteFilename[128];
     bool result = mDx3d->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
     if (!result) {
         MessageBox(hwnd, "could not initialize Direct3D", "Error", MB_OK);
@@ -30,20 +31,33 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
         return false;
     }
 
-    strcpy_s(bitmapFilename, "../src/res/textures/stone01.tga");
-    mBitmap = new Bitmap;
-    result = mBitmap->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(),
-                                 screenWidth, screenHeight, bitmapFilename, 50, 50);
-    if (!result) return false;
+    strcpy_s(spriteFilename, "../src/res/data/sprites/sprite_data_01.txt");
+    mSprite = new Sprite;
+    result = mSprite->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), screenWidth, screenHeight, spriteFilename, 50, screenHeight - 50, hwnd);
+    if (!result) {
+        MessageBox(hwnd, (LPCSTR)"Could not initialize Sprite", (LPCSTR)"Error", MB_OK);
+        return false;
+    }
+    
+    mTimer = new Timer;
+    result = mTimer->Initialize();
+    if (!result) {
+        MessageBox(hwnd, (LPCSTR)"Could not initialize Timer", (LPCSTR)"Error", MB_OK);
+        return false;
+    }    
 
     return true;
 }
 
 void Application::Shutdown(){
-    if (mBitmap) {
-        mBitmap->Shutdown();
-        delete mBitmap;
-        mBitmap = nullptr;
+    if (mTimer) {
+        delete mTimer;
+        mTimer = nullptr;
+    }
+    if (mSprite) {
+        mSprite->Shutdown();
+        delete mSprite;
+        mSprite = nullptr;
     }
     if (mTextureShader) {
         mTextureShader->Shutdown();
@@ -63,11 +77,15 @@ void Application::Shutdown(){
 }
 
 bool Application::Frame() {
+    float frameTime;
+    mTimer->Frame();
+    frameTime = mTimer->GetTime();
+    mSprite->Update(frameTime);
+
     bool result = Render();
     if (!result) {
         return false;
     }
-    
     return true;
 }
 
@@ -76,19 +94,19 @@ bool Application::Render(){
     DirectX::XMMATRIX worldMatrix, viewMatrix, orthoMatrix;
     bool result;
 
-    mDx3d->BeginScene(0.01f, 0.01f, 0.01f, 1.0f);
+    mDx3d->BeginScene(0.05f, 0.05f, 0.05f, 1.0f);
 
     mDx3d->GetWorldMatrix(worldMatrix);
     mCamera->GetViewMatrix(viewMatrix);
     mDx3d->GetOrthoMatrix(orthoMatrix);
 
     mDx3d->TurnZBufferOff();
-    result = mBitmap->Render(mDx3d->GetDeviceContext());
-    if (!result) return false;
+    result = mSprite->Render(mDx3d->GetDeviceContext());
+     if (!result) return false;
  
     // NOTE: if regular view matrix is changing, 2d rendering will use another view matrix
-    result = mTextureShader->Render(mDx3d->GetDeviceContext(), mBitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix,
-                                    mBitmap->GetTexture());
+    result = mTextureShader->Render(mDx3d->GetDeviceContext(), mSprite->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix,
+                                    mSprite->GetTexture());
     if(!result) return false;
 
     mDx3d->TurnZBufferOn();

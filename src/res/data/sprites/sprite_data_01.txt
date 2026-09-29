@@ -1,0 +1,6 @@
+4
+../src/res/data/sprites/sprite01.tga
+../src/res/data/sprites/sprite02.tga
+../src/res/data/sprites/sprite03.tga
+../src/res/data/sprites/sprite04.tga
+250
