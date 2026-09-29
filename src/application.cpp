@@ -31,7 +31,7 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
         return false;
     }
 
-    strcpy_s(spriteFilename, "../src/res/data/sprites/sprite_data_01.txt");
+    strcpy_s(spriteFilename, "./res/data/sprites/sprite_data_01.txt");
     mSprite = new Sprite;
     result = mSprite->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), screenWidth, screenHeight, spriteFilename, 50, screenHeight - 50, hwnd);
     if (!result) {
