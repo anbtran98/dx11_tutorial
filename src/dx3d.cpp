@@ -16,6 +16,8 @@ DX3D::DX3D(){
     mDepthStencilView = nullptr;
     mRasterState = nullptr;
     mDepthDisabledStencilState = nullptr;
+    mAlphaEnableBlendingState = nullptr;
+    mAlphaDisableBlendingState = nullptr;
 }
 
 bool DX3D::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd,
@@ -34,6 +36,7 @@ bool DX3D::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd,
     D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
     D3D11_DEPTH_STENCIL_DESC depthDisabledStencilDesc;
     D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+    D3D11_BLEND_DESC blendStateDescription;
     D3D11_RASTERIZER_DESC rasterDesc;
 
     unsigned int numModes, numerator, denominator;
@@ -224,10 +227,29 @@ bool DX3D::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd,
     result = mDevice->CreateDepthStencilState(&depthDisabledStencilDesc, &mDepthDisabledStencilState);
     if (FAILED(result)) return false;
 
+    ZeroMemory(&blendStateDescription, sizeof(D3D11_BLEND_DESC));
+    blendStateDescription.RenderTarget[0].BlendEnable = TRUE;
+    blendStateDescription.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+    blendStateDescription.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    blendStateDescription.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    blendStateDescription.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    blendStateDescription.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+    blendStateDescription.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    blendStateDescription.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+
+    result = mDevice->CreateBlendState(&blendStateDescription, &mAlphaEnableBlendingState);
+    if (FAILED(result)) return false;
+
+    blendStateDescription.RenderTarget[0].BlendEnable = FALSE;
+    result = mDevice->CreateBlendState(&blendStateDescription, &mAlphaDisableBlendingState);
+    if (FAILED(result)) return false;
+
     return true;
 }
 
 void DX3D::Shutdown(){
+    if (mAlphaEnableBlendingState) {mAlphaEnableBlendingState->Release(); mAlphaEnableBlendingState = nullptr;}
+    if (mAlphaDisableBlendingState) {mAlphaDisableBlendingState->Release(); mAlphaDisableBlendingState = nullptr;}
     if (mSwapChain) { mSwapChain->SetFullscreenState(false, NULL); }
     if (mDepthDisabledStencilState) {mDepthDisabledStencilState->Release(); mDepthDisabledStencilState = nullptr;}
     if (mRasterState) { mRasterState->Release(); mRasterState = nullptr; }
@@ -262,4 +284,14 @@ void DX3D::GetVideoCardInfo(char* vCardName, int& memory){
     strcpy_s(vCardName, 128, mGPUDescription);
     memory = mVRam;
     return;
+}
+
+void DX3D::EnableAlphaBlending() {
+    float blendFactor[4] = {0};
+    mDeviceContext->OMSetBlendState(mAlphaEnableBlendingState, blendFactor, 0xffffffff);
+}
+
+void DX3D::DisableAlphaBlending() {
+    float blendFactor[4] = {0};
+    mDeviceContext->OMSetBlendState(mAlphaDisableBlendingState, blendFactor, 0xffffffff);
 }

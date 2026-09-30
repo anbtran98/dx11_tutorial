@@ -6,14 +6,16 @@ Application::~Application(){}
 Application::Application(){
     mDx3d = nullptr;
     mCamera = nullptr;
-    mTextureShader = nullptr;
-    mSprite = nullptr;
-    mTimer = nullptr;
+    mFontShader = nullptr;
+    mFont = nullptr;
+    mTextString1 = nullptr;
+    mTextString2 = nullptr;
 }
 
 bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     mDx3d = new DX3D;
-    char spriteFilename[128];
+    char testString1[32], testString2[32];
+    // char spriteFilename[128];
     bool result = mDx3d->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
     if (!result) {
         MessageBox(hwnd, "could not initialize Direct3D", "Error", MB_OK);
@@ -24,45 +26,66 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     mCamera->SetPosition(0.0f, 0.0f, -10.0f);
     mCamera->Render();
 
-    mTextureShader = new TextureShader;
-    result = mTextureShader->Initialize(mDx3d->GetDevice(), hwnd);
+    mFontShader = new FontShader;
+    result = mFontShader->Initialize(mDx3d->GetDevice(), hwnd);
     if (!result) {
-        MessageBox(hwnd, (LPCSTR)"Could not initialize the texture shader object", (LPCSTR)"Error", MB_OK);
+        MessageBox(hwnd, (LPCSTR)"Could not initialize the Font Shader Object", (LPCSTR)"Error", MB_OK);
         return false;
     }
 
-    strcpy_s(spriteFilename, "./res/data/sprites/sprite_data_01.txt");
-    mSprite = new Sprite;
-    result = mSprite->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), screenWidth, screenHeight, spriteFilename, 50, screenHeight - 50, hwnd);
+    mFont = new Font;
+    result = mFont->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), 0);
     if (!result) {
-        MessageBox(hwnd, (LPCSTR)"Could not initialize Sprite", (LPCSTR)"Error", MB_OK);
+        MessageBox(hwnd, (LPCSTR)"Could not initialize the Font Object", (LPCSTR)"Error", MB_OK);
         return false;
     }
-    
-    mTimer = new Timer;
-    result = mTimer->Initialize();
+
+    strcpy_s(testString1, "Hello");
+    strcpy_s(testString2, "Goodbye");
+
+    /*
+      NOTE: for text string 1 & 2, (0, 0) in on top left
+     */
+
+    mTextString1 = new Text;
+    result = mTextString1->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), screenWidth, screenHeight, 32, mFont,
+                                      testString1, 10, -10, 0.0f, 1.0f, 0.0f);
     if (!result) {
-        MessageBox(hwnd, (LPCSTR)"Could not initialize Timer", (LPCSTR)"Error", MB_OK);
+        MessageBox(hwnd, (LPCSTR)"Could not initialize the text string 1", (LPCSTR)"Error", MB_OK);
         return false;
-    }    
+    }
+
+    mTextString2 = new Text;
+    result = mTextString2->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), screenWidth, screenHeight, 32, mFont,
+                                      testString2, 10, -50, 1.0f, 1.0f, 0.0f);
+    if (!result) {
+        MessageBox(hwnd, (LPCSTR)"Could not initialize the text string 2", (LPCSTR)"Error", MB_OK);
+        return false;
+    }
 
     return true;
 }
 
 void Application::Shutdown(){
-    if (mTimer) {
-        delete mTimer;
-        mTimer = nullptr;
+    if (mTextString1) {
+        mTextString1->Shutdown();
+        delete mTextString1;
+        mTextString1 = nullptr;
     }
-    if (mSprite) {
-        mSprite->Shutdown();
-        delete mSprite;
-        mSprite = nullptr;
+    if (mTextString2) {
+        mTextString2->Shutdown();
+        delete mTextString2;
+        mTextString2 = nullptr;
     }
-    if (mTextureShader) {
-        mTextureShader->Shutdown();
-        delete mTextureShader;
-        mTextureShader = nullptr;
+    if (mFont) {
+        mFont->Shutdown();
+        delete mFont;
+        mFont = nullptr;
+    }
+    if (mFontShader) {
+        mFontShader->Shutdown();
+        delete mFontShader;
+        mFontShader = nullptr;
     }
     if (mCamera) {
         delete mCamera;
@@ -77,11 +100,6 @@ void Application::Shutdown(){
 }
 
 bool Application::Frame() {
-    float frameTime;
-    mTimer->Frame();
-    frameTime = mTimer->GetTime();
-    mSprite->Update(frameTime);
-
     bool result = Render();
     if (!result) {
         return false;
@@ -101,15 +119,24 @@ bool Application::Render(){
     mDx3d->GetOrthoMatrix(orthoMatrix);
 
     mDx3d->TurnZBufferOff();
-    result = mSprite->Render(mDx3d->GetDeviceContext());
-     if (!result) return false;
- 
-    // NOTE: if regular view matrix is changing, 2d rendering will use another view matrix
-    result = mTextureShader->Render(mDx3d->GetDeviceContext(), mSprite->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix,
-                                    mSprite->GetTexture());
-    if(!result) return false;
+    mDx3d->EnableAlphaBlending();
+
+    mTextString1->Render(mDx3d->GetDeviceContext());
+    result = mFontShader->Render( mDx3d->GetDeviceContext(), mTextString1->GetIndexCount(), worldMatrix,
+                                 viewMatrix, orthoMatrix, mFont->GetTexture(), mTextString1->GetPixelColor());
+    if (!result) {
+        return false;
+    }
+
+    mTextString2->Render(mDx3d->GetDeviceContext());
+    result = mFontShader->Render(mDx3d->GetDeviceContext(), mTextString2->GetIndexCount(), worldMatrix,
+                                 viewMatrix, orthoMatrix, mFont->GetTexture(), mTextString2->GetPixelColor());
+    if (!result) {
+        return false;
+    }    
 
     mDx3d->TurnZBufferOn();
+    mDx3d->DisableAlphaBlending();
     mDx3d->EndScene();
     return true;
 }

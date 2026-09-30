@@ -4,9 +4,9 @@
 // #include <windows.h>
 #include "dx3d.h"
 #include "camera.h"
-#include "textureShader.h"
-#include "sprite.h"
-#include "timer.h"
+#include "fontshader.h"
+#include "font.h"
+#include "text.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -16,9 +16,9 @@ const float SCREEN_NEAR = 0.3f;
 class Application {
     DX3D* mDx3d;
     Camera* mCamera;
-    TextureShader* mTextureShader;
-    Sprite* mSprite;
-    Timer* mTimer;
+    FontShader* mFontShader;
+    Font* mFont;
+    Text *mTextString1, *mTextString2;
 
     bool Render();
 

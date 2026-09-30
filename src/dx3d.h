@@ -21,6 +21,8 @@ class DX3D {
     ID3D11DepthStencilState* mDepthDisabledStencilState;
     ID3D11DepthStencilView* mDepthStencilView;
     ID3D11RasterizerState* mRasterState;
+    ID3D11BlendState* mAlphaEnableBlendingState;
+    ID3D11BlendState* mAlphaDisableBlendingState;
     DirectX::XMMATRIX mWorldMatrix;
     DirectX::XMMATRIX mOrthoMatrix;
     DirectX::XMMATRIX mProjectionMatrix;
@@ -51,6 +53,8 @@ class DX3D {
 
     void TurnZBufferOn();
     void TurnZBufferOff();
+    void EnableAlphaBlending();
+    void DisableAlphaBlending();
 };
 
 #endif // _DX3D_H
