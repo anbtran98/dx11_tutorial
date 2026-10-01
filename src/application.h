@@ -7,6 +7,7 @@
 #include "fontshader.h"
 #include "font.h"
 #include "text.h"
+#include "fps.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -18,9 +19,12 @@ class Application {
     Camera* mCamera;
     FontShader* mFontShader;
     Font* mFont;
-    Text *mTextString1, *mTextString2;
+    Text* mFpsString;
+    FPS* mFps;
+    int mPreviousFps;
 
     bool Render();
+    bool UpdateFps();
 
  public:
     Application();

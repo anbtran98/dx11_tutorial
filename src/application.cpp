@@ -8,14 +8,14 @@ Application::Application(){
     mCamera = nullptr;
     mFontShader = nullptr;
     mFont = nullptr;
-    mTextString1 = nullptr;
-    mTextString2 = nullptr;
+    mFps = nullptr;
+    mFpsString = nullptr;
+
 }
 
 bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     mDx3d = new DX3D;
-    char testString1[32], testString2[32];
-    // char spriteFilename[128];
+    char fpsString[32];
     bool result = mDx3d->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
     if (!result) {
         MessageBox(hwnd, "could not initialize Direct3D", "Error", MB_OK);
@@ -40,42 +40,29 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
         return false;
     }
 
-    strcpy_s(testString1, "Hello");
-    strcpy_s(testString2, "Goodbye");
+    mFps = new FPS;
+    mFps->Initialize();
 
-    /*
-      NOTE: for text string 1 & 2, (0, 0) in on top left
-     */
+    mPreviousFps = -1;
+    strcpy_s(fpsString, "FPS: 0");
 
-    mTextString1 = new Text;
-    result = mTextString1->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), screenWidth, screenHeight, 32, mFont,
-                                      testString1, 10, -10, 0.0f, 1.0f, 0.0f);
-    if (!result) {
-        MessageBox(hwnd, (LPCSTR)"Could not initialize the text string 1", (LPCSTR)"Error", MB_OK);
-        return false;
-    }
-
-    mTextString2 = new Text;
-    result = mTextString2->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), screenWidth, screenHeight, 32, mFont,
-                                      testString2, 10, -50, 1.0f, 1.0f, 0.0f);
-    if (!result) {
-        MessageBox(hwnd, (LPCSTR)"Could not initialize the text string 2", (LPCSTR)"Error", MB_OK);
-        return false;
-    }
+    mFpsString = new Text;
+    result = mFpsString->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), screenWidth, screenHeight, 32, mFont,
+                                    fpsString, 10, 10, 0.0f, 1.0f, 0.0f);
+    if (!result) return false;
 
     return true;
 }
 
 void Application::Shutdown(){
-    if (mTextString1) {
-        mTextString1->Shutdown();
-        delete mTextString1;
-        mTextString1 = nullptr;
+    if (mFpsString) {
+        mFpsString->Shutdown();
+        delete mFpsString;
+        mFpsString = nullptr;
     }
-    if (mTextString2) {
-        mTextString2->Shutdown();
-        delete mTextString2;
-        mTextString2 = nullptr;
+    if (mFps) {
+        delete mFps;
+        mFps = nullptr;
     }
     if (mFont) {
         mFont->Shutdown();
@@ -100,10 +87,14 @@ void Application::Shutdown(){
 }
 
 bool Application::Frame() {
-    bool result = Render();
-    if (!result) {
-        return false;
-    }
+    bool result;
+
+    result = UpdateFps();
+    if (!result) return false;
+
+    result = Render();
+    if (!result) { return false; }
+
     return true;
 }
 
@@ -121,23 +112,51 @@ bool Application::Render(){
     mDx3d->TurnZBufferOff();
     mDx3d->EnableAlphaBlending();
 
-    mTextString1->Render(mDx3d->GetDeviceContext());
-    result = mFontShader->Render( mDx3d->GetDeviceContext(), mTextString1->GetIndexCount(), worldMatrix,
-                                 viewMatrix, orthoMatrix, mFont->GetTexture(), mTextString1->GetPixelColor());
-    if (!result) {
-        return false;
-    }
-
-    mTextString2->Render(mDx3d->GetDeviceContext());
-    result = mFontShader->Render(mDx3d->GetDeviceContext(), mTextString2->GetIndexCount(), worldMatrix,
-                                 viewMatrix, orthoMatrix, mFont->GetTexture(), mTextString2->GetPixelColor());
-    if (!result) {
-        return false;
-    }    
+    mFpsString->Render(mDx3d->GetDeviceContext());
+    result = mFontShader->Render(mDx3d->GetDeviceContext(), mFpsString->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix,
+                                 mFont->GetTexture(), mFpsString->GetPixelColor());
+    if (!result) return false;
 
     mDx3d->TurnZBufferOn();
     mDx3d->DisableAlphaBlending();
+
     mDx3d->EndScene();
     return true;
 }
 
+bool Application::UpdateFps() {
+    int fps;
+    char tempString[16], finalString[16];
+    float red, green, blue;
+    bool result;
+
+    mFps->Frame();
+    fps = mFps->GetFps();
+    if (mPreviousFps == fps) { return true; }
+
+    mPreviousFps = fps;
+    if (fps > 99999) { fps = 99999; }
+    sprintf_s(tempString, "%d", fps);
+
+    strcpy_s(finalString, "FPS: ");
+    strcat_s(finalString, tempString);
+
+    if (fps >= 60) {
+        red = 0.0f;
+        green = 1.0f;
+        blue = 0.0f;
+    } else if (fps < 60) {
+        red = 1.0f;
+        green = 1.0f;
+        blue = 0.0f;
+    } else if (fps < 30) {
+        red = 1.0f;
+        green = 0.0f;
+        blue = 0.0f;
+    }
+
+    result = mFpsString->UpdateText(mDx3d->GetDeviceContext(), mFont, finalString, 0, 0, red, green, blue);
+    if (!result) return false;
+
+    return true;
+}
