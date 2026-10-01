@@ -8,5 +8,5 @@ file (GLOB_RECURSE SOURCES
      "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 add_executable(dx11 WIN32 ${SOURCES})
-target_link_libraries(dx11 PRIVATE d3d11 dxgi d3dcompiler winmm)
+target_link_libraries(dx11 PRIVATE d3d11 dxgi d3dcompiler winmm dinput8 dxguid)
 #target_link_options(dx11 PRIVATE /SUBSYSTEM:CONSOLE /ENTRY:WinMainCRTStartup)

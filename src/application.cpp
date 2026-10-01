@@ -8,14 +8,12 @@ Application::Application(){
     mCamera = nullptr;
     mFontShader = nullptr;
     mFont = nullptr;
-    mFps = nullptr;
-    mFpsString = nullptr;
-
+    mMouseStrings = nullptr;
 }
 
 bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     mDx3d = new DX3D;
-    char fpsString[32];
+    char mouseString1[32], mouseString2[32], mouseString3[32];
     bool result = mDx3d->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
     if (!result) {
         MessageBox(hwnd, "could not initialize Direct3D", "Error", MB_OK);
@@ -40,29 +38,31 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
         return false;
     }
 
-    mFps = new FPS;
-    mFps->Initialize();
+    strcpy_s(mouseString1, "Mouse X: 0");
+    strcpy_s(mouseString2, "Mouse Y: 0");
+    strcpy_s(mouseString3, "Mouse Button: No");
 
-    mPreviousFps = -1;
-    strcpy_s(fpsString, "FPS: 0");
-
-    mFpsString = new Text;
-    result = mFpsString->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), screenWidth, screenHeight, 32, mFont,
-                                    fpsString, 10, 10, 0.0f, 1.0f, 0.0f);
+    mMouseStrings = new Text[3];
+    result = mMouseStrings[0].Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), screenWidth, screenHeight, 32, mFont,
+                                         mouseString1, 10, 10, 1.0f, 1.0f, 1.0f);
     if (!result) return false;
+    result = mMouseStrings[1].Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), screenWidth, screenHeight, 32, mFont,
+                                         mouseString1, 10, -35, 1.0f, 1.0f, 1.0f);
+    if (!result) return false;
+    result = mMouseStrings[2].Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), screenWidth, screenHeight, 32, mFont,
+                                         mouseString1, 10, -60, 1.0f, 1.0f, 1.0f);
+    if (!result) return false;    
 
     return true;
 }
 
 void Application::Shutdown(){
-    if (mFpsString) {
-        mFpsString->Shutdown();
-        delete mFpsString;
-        mFpsString = nullptr;
-    }
-    if (mFps) {
-        delete mFps;
-        mFps = nullptr;
+    if (mMouseStrings) {
+        mMouseStrings[0].Shutdown();
+        mMouseStrings[1].Shutdown();
+        mMouseStrings[2].Shutdown();
+        delete [] mMouseStrings;
+        mMouseStrings = nullptr;
     }
     if (mFont) {
         mFont->Shutdown();
@@ -86,11 +86,44 @@ void Application::Shutdown(){
     return;
 }
 
-bool Application::Frame() {
+bool Application::UpdateMouseStrings(int mX, int mY, bool mouseDown) {
+    char tempString[16], finalString[32];
     bool result;
 
-    result = UpdateFps();
+    sprintf_s(tempString, "%d", mX);
+    strcpy_s(finalString, "MouseX: ");
+    strcat_s(finalString, tempString);
+    result = mMouseStrings[0].UpdateText(mDx3d->GetDeviceContext(), mFont, finalString, 0, -10, 1.0f, 1.0f, 1.0f);
     if (!result) return false;
+
+    sprintf_s(tempString, "%d", mY);
+    strcpy_s(finalString, "Mouse Y: ");
+    strcat_s(finalString, tempString);
+    result = mMouseStrings[1].UpdateText(mDx3d->GetDeviceContext(), mFont, finalString, 0, -35, 1.0f, 1.0f, 1.0f);
+    if (!result) return false;
+
+    if (mouseDown)
+        strcpy_s(finalString, "Mouse Down: Yes");
+    else
+        strcpy_s(finalString, "Mouse Down: No");
+    result = mMouseStrings[2].UpdateText(mDx3d->GetDeviceContext(), mFont, finalString, 0, -60, 1.0f, 1.0f, 1.0f);
+    if (!result) return false;
+
+    return true;
+}
+
+bool Application::Frame(Input* input) {
+    int mouseX, mouseY;
+    bool result, mouseDown;
+
+    if (input->IsEscapePressed())
+        return false;
+
+    input->GetMouseLocation(mouseX, mouseY);
+    mouseDown = input->IsMousePressed();
+
+    result = UpdateMouseStrings(mouseX, mouseY, mouseDown);
+    if (!result) { return false; }
 
     result = Render();
     if (!result) { return false; }
@@ -112,51 +145,16 @@ bool Application::Render(){
     mDx3d->TurnZBufferOff();
     mDx3d->EnableAlphaBlending();
 
-    mFpsString->Render(mDx3d->GetDeviceContext());
-    result = mFontShader->Render(mDx3d->GetDeviceContext(), mFpsString->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix,
-                                 mFont->GetTexture(), mFpsString->GetPixelColor());
-    if (!result) return false;
+    for (int i = 0; i < 3; i++) {
+        mMouseStrings[i].Render(mDx3d->GetDeviceContext());
+        result = mFontShader->Render(mDx3d->GetDeviceContext(), mMouseStrings[i].GetIndexCount(), worldMatrix, viewMatrix,
+                                     orthoMatrix, mFont->GetTexture(), mMouseStrings[i].GetPixelColor());
+        if (!result) return false;
+    }
 
     mDx3d->TurnZBufferOn();
     mDx3d->DisableAlphaBlending();
 
     mDx3d->EndScene();
-    return true;
-}
-
-bool Application::UpdateFps() {
-    int fps;
-    char tempString[16], finalString[16];
-    float red, green, blue;
-    bool result;
-
-    mFps->Frame();
-    fps = mFps->GetFps();
-    if (mPreviousFps == fps) { return true; }
-
-    mPreviousFps = fps;
-    if (fps > 99999) { fps = 99999; }
-    sprintf_s(tempString, "%d", fps);
-
-    strcpy_s(finalString, "FPS: ");
-    strcat_s(finalString, tempString);
-
-    if (fps >= 60) {
-        red = 0.0f;
-        green = 1.0f;
-        blue = 0.0f;
-    } else if (fps < 60) {
-        red = 1.0f;
-        green = 1.0f;
-        blue = 0.0f;
-    } else if (fps < 30) {
-        red = 1.0f;
-        green = 0.0f;
-        blue = 0.0f;
-    }
-
-    result = mFpsString->UpdateText(mDx3d->GetDeviceContext(), mFont, finalString, 0, 0, red, green, blue);
-    if (!result) return false;
-
     return true;
 }

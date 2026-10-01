@@ -4,6 +4,7 @@
 // #include <windows.h>
 #include "dx3d.h"
 #include "camera.h"
+#include "input.h"
 #include "fontshader.h"
 #include "font.h"
 #include "text.h"
@@ -19,12 +20,11 @@ class Application {
     Camera* mCamera;
     FontShader* mFontShader;
     Font* mFont;
-    Text* mFpsString;
-    FPS* mFps;
-    int mPreviousFps;
+    Text* mMouseStrings;
 
     bool Render();
     bool UpdateFps();
+    bool UpdateMouseStrings(int, int, bool);
 
  public:
     Application();
@@ -33,7 +33,7 @@ class Application {
 
     bool Initialize(int, int, HWND);
     void Shutdown();
-    bool Frame();
+    bool Frame(Input*);
 };
 
 #endif // _APPLICATION_H

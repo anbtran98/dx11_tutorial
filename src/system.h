@@ -15,8 +15,8 @@ class System {
     HINSTANCE mInstance;
     HWND mHwnd;
 
-    Input* mpInput;
-    Application* mpApplication;
+    Input* mInput;
+    Application* mApplication;
     
     bool Frame();
     void InitializeWindows(int&, int&);

@@ -1,10 +1,12 @@
 #include "system.h"
-/* PUBLIC */
+
+LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam){
+    return DefWindowProc(hwnd, umsg, wparam, lparam);}
 System::System(const System&){}
 System::~System(){}
 System::System(){
-    mpInput = nullptr;
-    mpApplication = nullptr;
+    mInput = nullptr;
+    mApplication = nullptr;
 }
 
 bool System::Initialize(){
@@ -12,25 +14,26 @@ bool System::Initialize(){
     bool result;
 
     InitializeWindows(screenWidth, screenHeight);
-    mpInput = new Input;
-    mpInput->Initialize();
+    mInput = new Input;
+    result = mInput->Initialize(mInstance, mHwnd, screenWidth, screenHeight);
+    if (!result) {return false;}
 
-    mpApplication = new Application;
-    result = mpApplication->Initialize(screenWidth, screenHeight, mHwnd);
+    mApplication = new Application;
+    result = mApplication->Initialize(screenWidth, screenHeight, mHwnd);
     if (!result) {return false;}
     return true;
 }
 
 void System::Shutdown(){
-    if (mpApplication) {
-        mpApplication->Shutdown();
-        delete mpApplication;
-        mpApplication = nullptr;
+    if (mApplication) {
+        mApplication->Shutdown();
+        delete mApplication;
+        mApplication = nullptr;
     }
 
-    if (mpInput) {
-        delete mpInput;
-        mpInput = nullptr;
+    if (mInput) {
+        delete mInput;
+        mInput = nullptr;
     }
     ShutdownWindows();
     return;
@@ -56,30 +59,12 @@ void System::Run(){
     return;
 }
 
-
-LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam){
-    switch (umsg) {
-    case WM_KEYDOWN:{
-        mpInput->KeyDown((unsigned int)wparam);
-        return 0;
-    }break;
-    case WM_KEYUP:{
-        mpInput->KeyUp((unsigned int)lparam);
-        return 0;
-    }break;
-    default:{
-        return DefWindowProc(hwnd, umsg, wparam, lparam);
-    }break;
-    }
-    return -1;
-}
-
-/* PRIVATE */
 bool System::Frame(){
     bool result;
-    if (mpInput->IsKeyDown(VK_ESCAPE)) { return false; }
+    result = mInput->Frame();
+    if (!result) {return false;}
 
-    result = mpApplication->Frame();
+    result = mApplication->Frame(mInput);
     if (!result) {return false;}
     return true;
 }
