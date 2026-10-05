@@ -6,7 +6,7 @@ Application::~Application(){}
 Application::Application(){
     mDx3d = nullptr;
     mCamera = nullptr;
-    mMultiTextureShader = nullptr;
+    mLightMapShader = nullptr;
     mModel = nullptr;
 }
 
@@ -20,19 +20,19 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     }
 
     mCamera = new Camera;
-    mCamera->SetPosition(0.0f, 0.0f, -5.0f);
+    mCamera->SetPosition(0.0f, 0.0f, -3.0f);
     mCamera->Render();
 
-    mMultiTextureShader = new MultiTextureShader;
-    result = mMultiTextureShader->Initialize(mDx3d->GetDevice(), hwnd);
+    mLightMapShader = new LightMapShader;
+    result = mLightMapShader->Initialize(mDx3d->GetDevice(), hwnd);
     if (!result) {
-        MessageBox(hwnd, (LPCSTR)"Could not initilize the multi-texture shader object", (LPCSTR)"Error", MB_OK);
+        MessageBox(hwnd, (LPCSTR)"Could not initilize the light map shader object", (LPCSTR)"Error", MB_OK);
         return false;
     }
 
     strcpy_s(modelFilename, "../src/res/data/square.txt");
     strcpy_s(textureFilename1, "../src/res/textures/stone01.tga");
-    strcpy_s(textureFilename2, "../src/res/textures/dirt01.tga");
+    strcpy_s(textureFilename2, "../src/res/textures/light01.tga");
     mModel = new Model;
     result = mModel->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), modelFilename, textureFilename1, textureFilename2);
     if (!result) return false;
@@ -46,10 +46,10 @@ void Application::Shutdown(){
         delete mModel;
         mModel = nullptr;
     }
-    if (mMultiTextureShader) {
-        mMultiTextureShader->Shutdown();
-        delete mMultiTextureShader;
-        mMultiTextureShader = nullptr;
+    if (mLightMapShader) {
+        mLightMapShader->Shutdown();
+        delete mLightMapShader;
+        mLightMapShader = nullptr;
     }
     if (mCamera) {
         delete mCamera;
@@ -80,14 +80,14 @@ bool Application::Render(){
     DirectX::XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
     bool result;
 
-    mDx3d->BeginScene(0.05f, 0.05f, 0.05f, 1.0f);
+    mDx3d->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
     mDx3d->EnableAlphaBlending();
     mDx3d->GetWorldMatrix(worldMatrix);
     mCamera->GetViewMatrix(viewMatrix);
     mDx3d->GetProjectionMatrix(projectionMatrix);
 
     mModel->Render(mDx3d->GetDeviceContext());
-    result = mMultiTextureShader->Render(mDx3d->GetDeviceContext(), mModel->GetIndexCount(), worldMatrix, viewMatrix,
+    result = mLightMapShader->Render(mDx3d->GetDeviceContext(), mModel->GetIndexCount(), worldMatrix, viewMatrix,
                                          projectionMatrix, mModel->GetTexture(0), mModel->GetTexture(1));
     if (!result) return false;
 

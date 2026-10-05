@@ -1,0 +1,20 @@
+Texture2D shaderTexture1 : register(t0);
+Texture2D shaderTexture2 : register(t1);
+SamplerState sampleType : register(s0);
+
+struct PixelInput {
+    float4 position : SV_POSITION;
+    float2 tex:TEXCOORD0;
+};
+
+float4 LightMapPixelShader(PixelInput input) : SV_TARGET {
+    float4 color;
+    float4 lightColor;
+    float4 finalColor;
+
+    color = shaderTexture1.Sample(sampleType, input.tex);
+    lightColor = shaderTexture2.Sample(sampleType, input.tex);
+    finalColor = color * lightColor;
+
+    return finalColor;
+}
