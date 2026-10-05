@@ -3,20 +3,20 @@
 
 Model::Model(const Model& m){}
 Model::~Model(){}
-void Model::Shutdown(){ ReleaseTexture(); ShutdownBuffers(); ReleaseModel(); }
+void Model::Shutdown(){ ReleaseTextures(); ShutdownBuffers(); ReleaseModel(); }
 void Model::Render(ID3D11DeviceContext* deviceContext){ RenderBuffers(deviceContext); }
 int Model::GetIndexCount(){ return mIndexCount; }
-ID3D11ShaderResourceView* Model::GetTexture() { return mTexture->GetTexture(); }
+ID3D11ShaderResourceView* Model::GetTexture(int index) { return mTextures[index].GetTexture(); }
 
 Model::Model(){
     mVertexBuffer = nullptr;
     mIndexBuffer = nullptr;
-    mTexture = nullptr;
+    mTextures = nullptr;
     mModel = nullptr;
 }
 
 bool Model::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
-                       char* modelFilename, const char* textureFilename)
+                       char* modelFilename, char* textureFilename1, char* textureFilename2)
 {
     bool result;
     result = LoadModel(modelFilename);
@@ -31,22 +31,9 @@ bool Model::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
         return false;
     }
     
-    // Test if file physically exists before running loader
-    FILE* testPtr = nullptr;
-    if (fopen_s(&testPtr, textureFilename, "rb") != 0) {
-        char pathError[256];
-        sprintf_s(pathError, "Cannot physically open file!\nLooked at path: %s", textureFilename);
-        MessageBox(NULL, pathError, "Engine Diagnostic", MB_OK | MB_ICONERROR);
-        return false;
-    } else {
-        fclose(testPtr);
-    }
+    result = LoadTextures(device, deviceContext, textureFilename1, textureFilename2);
+    if (!result) return false;
 
-    result = LoadTexture(device, deviceContext, textureFilename);
-    if (!result) {
-        MessageBox(NULL, "Buffers built and file exists, but LoadTexture returned false!\n(Check TargaHeader struct size, BPP, or Mip generation details)", "Engine Diagnostic", MB_OK | MB_ICONERROR);
-        return false;
-    }
     return true;
 }
 
@@ -68,7 +55,6 @@ bool Model::InitializeBuffers(ID3D11Device* device){
         vertices[i].texture = DirectX::XMFLOAT2(mModel[i].tu, mModel[i].tv);
         vertices[i].normal = DirectX::XMFLOAT3(mModel[i].nx, mModel[i].ny, mModel[i].nz);
         indices[i] = i;
-        std::cout << "test" << std::endl;
     }    
 
     vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -128,19 +114,24 @@ void Model::RenderBuffers(ID3D11DeviceContext* deviceContext){
     return;
 }
 
-bool Model::LoadTexture(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* textureFilename) {
+bool Model::LoadTextures(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* filename1, char* filename2) {
     bool result;
-    mTexture = new Texture;
-    result = mTexture->Initialize(device, deviceContext, textureFilename);
+    mTextures = new Texture[2];
+    result = mTextures[0].Initialize(device, deviceContext, filename1);
     if (!result) return false;
+    
+    result = mTextures[1].Initialize(device, deviceContext, filename2);
+    if (!result) return false;
+
     return true;
 }
 
-void Model::ReleaseTexture() {
-    if (mTexture) {
-        mTexture->Shutdown();
-        delete mTexture;
-        mTexture = nullptr;
+void Model::ReleaseTextures() {
+    if (mTextures) {
+        mTextures[0].Shutdown();
+        mTextures[1].Shutdown();
+        delete [] mTextures;
+        mTextures = nullptr;
     }
 }
 

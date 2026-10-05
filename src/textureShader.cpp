@@ -198,7 +198,8 @@ bool TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, Dire
     bufferNumber = 0;
 
     deviceContext->VSSetConstantBuffers(bufferNumber, 1, &mMatrixBuffer);
-    deviceContext->PSSetShaderResources(0, 1, &texture);
+    // deviceContext->PSSetShaderResources(0, 1, &texture1);
+    // deviceContext->PSSetShaderResources(1, 1, &texture2);
     return true;
 }
 

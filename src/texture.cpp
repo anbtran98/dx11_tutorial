@@ -33,11 +33,6 @@ bool Texture::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContex
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
-    
-	// textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-	// textureDesc.CPUAccessFlags = 0;
-	// textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-    
     hResult = device->CreateTexture2D(&textureDesc, NULL, &mTexture);
     if (FAILED(hResult)) return false;
 
@@ -160,59 +155,5 @@ bool Texture::LoadTarga32Bit(const char* filename) {
 	targaImage = 0;
 
 	return true;
-    
-    // int error, bpp, imageSize, index;
-    // FILE* filePtr;
-    // unsigned int count;
-    // TargaHeader targaFileHeader;
-    // unsigned char* targaImage;
 
-    // error = fopen_s(&filePtr, filename, "rb");
-    // if (error != 0) return false;
-
-    // count = (unsigned int) fread(&targaFileHeader, sizeof(TargaHeader), 1, filePtr);
-    // if (count != 1) {
-    //     fclose(filePtr);
-    //     return false;
-    // }
-
-    // mHeight = (int)targaFileHeader.height;
-    // mWidth = (int)targaFileHeader.width;
-    // bpp = (int)targaFileHeader.bpp;
-    // if (bpp != 32) {
-    //     fclose(filePtr);
-    //      return false;
-    // }
-
-    // imageSize = mWidth * mHeight * 4;
-    // targaImage = new unsigned char[imageSize];
-
-    // count = (unsigned int)fread(targaImage, 1, imageSize, filePtr);
-    // if (count != imageSize) {
-    //     fclose(filePtr);
-    //      return false;
-    // }
-
-    // error = fclose(filePtr);
-    // if (error != 0) return false;
-
-    // mTargaData = new unsigned char[imageSize];
-    // index = 0;
-
-    // int k = (mWidth * mHeight * 4) - (mWidth * 4);
-    // for (int j = 0; j < mHeight; j++) {
-    //     for (int i = 0; i < mWidth; i++) {
-    //         mTargaData[index + 0] = targaImage[k + 2];
-    //         mTargaData[index + 1] = targaImage[k + 1];
-    //         mTargaData[index + 2] = targaImage[k + 0];
-    //         mTargaData[index + 3] = targaImage[k + 3];
-    //         k += 4;
-    //         index += 4;
-    //     }
-    //     k -= (mWidth * 8);
-    // }
-    // delete [] targaImage;
-    // targaImage = nullptr;
-
-    // return true;
 }

@@ -5,10 +5,8 @@
 #include "dx3d.h"
 #include "camera.h"
 #include "input.h"
-#include "fontshader.h"
-#include "font.h"
-#include "text.h"
-#include "fps.h"
+#include "multiTextureShader.h"
+#include "model.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -18,13 +16,10 @@ const float SCREEN_NEAR = 0.3f;
 class Application {
     DX3D* mDx3d;
     Camera* mCamera;
-    FontShader* mFontShader;
-    Font* mFont;
-    Text* mMouseStrings;
+    MultiTextureShader* mMultiTextureShader;
+    Model* mModel;
 
     bool Render();
-    bool UpdateFps();
-    bool UpdateMouseStrings(int, int, bool);
 
  public:
     Application();

@@ -21,12 +21,12 @@ class Model {
     };
 
     ID3D11Buffer *mVertexBuffer, *mIndexBuffer;
-    Texture* mTexture;
+    Texture* mTextures;
     int mVertexCount, mIndexCount;
     ModelType* mModel;
  
-    bool LoadTexture(ID3D11Device*, ID3D11DeviceContext*, const char*);
-    void ReleaseTexture();
+    bool LoadTextures(ID3D11Device*, ID3D11DeviceContext*, char*, char*);
+    void ReleaseTextures();
     bool InitializeBuffers(ID3D11Device*);
     void ShutdownBuffers();
     void RenderBuffers(ID3D11DeviceContext*);
@@ -38,11 +38,11 @@ class Model {
     Model(const Model&);
     ~Model();
 
-    bool Initialize(ID3D11Device*, ID3D11DeviceContext*, char*, const char*);
+    bool Initialize(ID3D11Device*, ID3D11DeviceContext*, char*, char*, char*);
     void Shutdown();
     void Render(ID3D11DeviceContext*);
     int GetIndexCount();
-    ID3D11ShaderResourceView* GetTexture();
+    ID3D11ShaderResourceView* GetTexture(int);
 };
 
 #endif _MODEL_H
