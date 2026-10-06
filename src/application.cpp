@@ -6,13 +6,13 @@ Application::~Application(){}
 Application::Application(){
     mDx3d = nullptr;
     mCamera = nullptr;
-    mLightMapShader = nullptr;
+    mAlphaMapShader = nullptr;
     mModel = nullptr;
 }
 
 bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     mDx3d = new DX3D;
-    char modelFilename[128], textureFilename1[128], textureFilename2[128];
+    char modelFilename[128], textureFilename1[128], textureFilename2[128], textureFilename3[128];
     bool result = mDx3d->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
     if (!result) {
         MessageBox(hwnd, "could not initialize Direct3D", "Error", MB_OK);
@@ -23,18 +23,20 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd){
     mCamera->SetPosition(0.0f, 0.0f, -3.0f);
     mCamera->Render();
 
-    mLightMapShader = new LightMapShader;
-    result = mLightMapShader->Initialize(mDx3d->GetDevice(), hwnd);
+    mAlphaMapShader = new AlphaMapShader;
+    result = mAlphaMapShader->Initialize(mDx3d->GetDevice(), hwnd);
     if (!result) {
-        MessageBox(hwnd, (LPCSTR)"Could not initilize the light map shader object", (LPCSTR)"Error", MB_OK);
+        MessageBox(hwnd, (LPCSTR)"Could not initilize the alpha map shader object", (LPCSTR)"Error", MB_OK);
         return false;
     }
 
-    strcpy_s(modelFilename, "../src/res/data/square.txt");
-    strcpy_s(textureFilename1, "../src/res/textures/stone01.tga");
-    strcpy_s(textureFilename2, "../src/res/textures/light01.tga");
+    strcpy_s(modelFilename, "./res/data/square.txt");
+    strcpy_s(textureFilename1, "./res/textures/stone01.tga");
+    strcpy_s(textureFilename2, "./res/textures/dirt01.tga");
+    strcpy_s(textureFilename3, "./res/textures/alpha01.tga");
     mModel = new Model;
-    result = mModel->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), modelFilename, textureFilename1, textureFilename2);
+    result = mModel->Initialize(mDx3d->GetDevice(), mDx3d->GetDeviceContext(), modelFilename,
+                                textureFilename1, textureFilename2, textureFilename3);
     if (!result) return false;
 
     return true;
@@ -46,10 +48,10 @@ void Application::Shutdown(){
         delete mModel;
         mModel = nullptr;
     }
-    if (mLightMapShader) {
-        mLightMapShader->Shutdown();
-        delete mLightMapShader;
-        mLightMapShader = nullptr;
+    if (mAlphaMapShader) {
+        mAlphaMapShader->Shutdown();
+        delete mAlphaMapShader;
+        mAlphaMapShader = nullptr;
     }
     if (mCamera) {
         delete mCamera;
@@ -87,8 +89,8 @@ bool Application::Render(){
     mDx3d->GetProjectionMatrix(projectionMatrix);
 
     mModel->Render(mDx3d->GetDeviceContext());
-    result = mLightMapShader->Render(mDx3d->GetDeviceContext(), mModel->GetIndexCount(), worldMatrix, viewMatrix,
-                                         projectionMatrix, mModel->GetTexture(0), mModel->GetTexture(1));
+    result = mAlphaMapShader->Render(mDx3d->GetDeviceContext(), mModel->GetIndexCount(), worldMatrix, viewMatrix,
+                                     projectionMatrix, mModel->GetTexture(0), mModel->GetTexture(1), mModel->GetTexture(2));
     if (!result) return false;
 
     mDx3d->EndScene();

@@ -5,7 +5,7 @@
 #include "dx3d.h"
 #include "camera.h"
 #include "input.h"
-#include "lightMapShader.h"
+#include "alphaMapShader.h"
 #include "model.h"
 
 const bool FULL_SCREEN = false;
@@ -16,7 +16,7 @@ const float SCREEN_NEAR = 0.3f;
 class Application {
     DX3D* mDx3d;
     Camera* mCamera;
-    LightMapShader* mLightMapShader;
+    AlphaMapShader* mAlphaMapShader;
     Model* mModel;
 
     bool Render();
