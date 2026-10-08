@@ -32,6 +32,9 @@ PixelInputType NormalMapVertexShader (VertexInputType input) {
     output.position = mul(output.position, projectionMatrix);
     output.tex = input.tex;
 
+    output.normal = mul(input.normal, (float3x3)worldMatrix);
+    output.normal = normalize(output.normal);
+
     output.tangent = mul(input.tangent, (float3x3)worldMatrix);
     output.tangent = normalize(output.tangent);
 

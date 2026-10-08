@@ -5,9 +5,9 @@
 #include "dx3d.h"
 #include "camera.h"
 #include "input.h"
-#include "specMapShader.h"
 #include "model.h"
 #include "light.h"
+#include "shaderManager.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -17,7 +17,7 @@ const float SCREEN_NEAR = 0.3f;
 class Application {
     DX3D* mDx3d;
     Camera* mCamera;
-    SpecMapShader* mSpecMapShader;
+    ShaderManager* mShaderManager;
     Model* mModel;
     Light* mLight;
 
