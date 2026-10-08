@@ -5,7 +5,7 @@
 #include "dx3d.h"
 #include "camera.h"
 #include "input.h"
-#include "normalMapShader.h"
+#include "specMapShader.h"
 #include "model.h"
 #include "light.h"
 
@@ -17,7 +17,7 @@ const float SCREEN_NEAR = 0.3f;
 class Application {
     DX3D* mDx3d;
     Camera* mCamera;
-    NormalMapShader* mNormalMapShader;
+    SpecMapShader* mSpecMapShader;
     Model* mModel;
     Light* mLight;
 

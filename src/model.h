@@ -39,7 +39,7 @@ class Model {
     int mVertexCount, mIndexCount;
     ModelType* mModel;
  
-    bool LoadTextures(ID3D11Device*, ID3D11DeviceContext*, char*, char*);
+    bool LoadTextures(ID3D11Device*, ID3D11DeviceContext*, char*, char*, char*);
     void ReleaseTextures();
     bool InitializeBuffers(ID3D11Device*);
     void ShutdownBuffers();
@@ -54,7 +54,7 @@ class Model {
     Model(const Model&);
     ~Model();
 
-    bool Initialize(ID3D11Device*, ID3D11DeviceContext*, char*, char*, char*);
+    bool Initialize(ID3D11Device*, ID3D11DeviceContext*, char*, char*, char*, char*);
     void Shutdown();
     void Render(ID3D11DeviceContext*);
     int GetIndexCount();
