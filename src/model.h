@@ -8,16 +8,30 @@
 #include "texture.h"
 
 class Model {
-    struct Vertex {
+    struct VertexType {
         DirectX::XMFLOAT3 position;
         DirectX::XMFLOAT2 texture;
         DirectX::XMFLOAT3 normal;
+        DirectX::XMFLOAT3 tangent;
+        DirectX::XMFLOAT3 binormal;
     };
 
     struct ModelType {
         float x, y, z;
         float tu, tv;
         float nx, ny, nz;
+        float tx, ty, tz;
+        float bx, by, bz;
+    };
+
+    struct TempVertexType {
+        float x, y, z;
+        float tu, tv;
+        float nx, ny, nz;
+    };
+
+    struct VectorType {
+        float x, y, z;
     };
 
     ID3D11Buffer *mVertexBuffer, *mIndexBuffer;
@@ -25,20 +39,22 @@ class Model {
     int mVertexCount, mIndexCount;
     ModelType* mModel;
  
-    bool LoadTextures(ID3D11Device*, ID3D11DeviceContext*, char*, char*, char*);
+    bool LoadTextures(ID3D11Device*, ID3D11DeviceContext*, char*, char*);
     void ReleaseTextures();
     bool InitializeBuffers(ID3D11Device*);
     void ShutdownBuffers();
     void RenderBuffers(ID3D11DeviceContext*);
     bool LoadModel(char*);
     void ReleaseModel();
+    void CalculateModelVectors();
+    void CalculateTangentBinormal(TempVertexType, TempVertexType, TempVertexType, VectorType&, VectorType&);
 
  public:
     Model();
     Model(const Model&);
     ~Model();
 
-    bool Initialize(ID3D11Device*, ID3D11DeviceContext*, char*, char*, char*, char*);
+    bool Initialize(ID3D11Device*, ID3D11DeviceContext*, char*, char*, char*);
     void Shutdown();
     void Render(ID3D11DeviceContext*);
     int GetIndexCount();
