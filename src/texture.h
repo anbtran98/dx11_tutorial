@@ -4,15 +4,7 @@
 #include <d3d11.h>
 #include <stdio.h>
 
-class Texture {
-    // struct TargaHeader {
-    //     unsigned char data1[12];
-    //     unsigned short width;
-    //     unsigned short height;
-    //     unsigned char bpp;
-    //     unsigned char data2;
-    // };
-  
+class Texture {  
     struct TargaHeader
     {
         unsigned char data1[12];

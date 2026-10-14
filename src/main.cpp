@@ -1,5 +1,4 @@
 #include "system.h"
-#include <iostream>
 
 int WINAPI WinMain (HINSTANCE hInstance,
                     HINSTANCE hInstancePrevious,

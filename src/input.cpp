@@ -1,6 +1,8 @@
 #include "Input.h"
 
 bool Input::IsEscapePressed() { return (mKeyboardState[DIK_ESCAPE] & 0x80) ? true : false; }
+bool Input::IsLeftArrowPressed() {return (mKeyboardState[DIK_LEFT] & 0x80) ? true : false;}
+bool Input::IsRightArrowPressed() {return (mKeyboardState[DIK_RIGHT] & 0x80) ? true : false;}
 bool Input::IsMousePressed() { return (mMouseState.rgbButtons[0] & 0x80) ? true : false; }
 void Input::GetMouseLocation(int& mouseX, int& mouseY) { mouseX = mMouseX; mouseY = mMouseY; }
 
